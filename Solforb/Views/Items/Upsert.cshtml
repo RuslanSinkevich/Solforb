@@ -1,0 +1,65 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Solforb.Models.OrderItem
+
+@if(Model?.Id == null)
+{
+    <h3>Создание элемента заказа</h3>
+}
+else
+{
+    <h3>Обновить элемент заказа</h3>
+}
+<hr />
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>@ViewBag.Error</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Upsert">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input hidden asp-for="OrderId" value="@ViewBag.OrderId"  class="form-control" />
+            @if (Model != null)
+            {
+                <input hidden asp-for="Id" value="@Model.Id" class="form-control"/>
+            }
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" value="@Model?.Name" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Quantity" class="form-label"></label>
+                <input asp-for="Quantity" class="form-control" value="@Model?.Quantity" />
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Unit" class="form-label"></label>
+                <input asp-for="Unit" class="form-control" value="@Model?.Unit" />
+                <span asp-validation-for="Unit" class="text-danger"></span>
+            </div>
+            <div class="mb-3">  
+                @if(Model?.Id == null)
+                {
+                    <input type="submit" value="Создать" class="btn btn-primary" />
+                }
+                else
+                {
+                    <input type="submit" value="Обновить" class="btn btn-primary" />
+                }
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index" asp-route-Id="@ViewBag.OrderId">Назад</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,102 @@
+﻿@using System.Globalization
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model IEnumerable<Solforb.Models.OrderItem>
+
+
+<h3>Список материалов, заказ (@ViewBag.Number)</h3>
+
+<div class="d-flex justify-content-between">
+    <a asp-action="Upsert" asp-route-orderId="@ViewBag.OrderId" type="button" class="btn btn-primary">Добавить материал</a>
+    <a class="btn btn-secondary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+        Фильтр
+    </a>
+</div>
+<div class="text-center border shadow p-3 mb-4 mt-3 rounded collapse" id="collapseExample">
+    <form class="d-flex flex-row align-items-end" method="post" asp-action="Index">
+        <input hidden="" name="OrderId" value="@ViewBag.OrderId" type="text" />
+        <div class="mr-3" style="width: 200px">
+            <label class="col-form-label">Название</label>
+            <input class="form-control" name="Name" type="text"/>
+        </div>
+        <div class="mr-3" style="width: 200px">
+            <label class="form-label">Ед. изм.</label>
+            <select id="select_unit" name="Unit" class="form-control"></select>
+        </div>
+        <div class="mr-3">
+            <input type="submit" value="Поиск" class="btn btn-primary"/>
+        </div>
+        <div class="mr-3">
+            <a asp-action="Index" asp-route-Id="@ViewBag.OrderId" type="button" class="btn btn-secondary">Сбросить</a>
+        </div>
+    </form>
+</div>
+<div class="text-center border shadow p-3 mb-4 mt-3 rounded">
+    <table class="table table-hover">
+        <thead class="table-dark">
+        <tr>
+            <th scope="col">
+                Название
+            </th>
+            <th scope="col">
+                Количество
+            </th>
+            <th scope="col">
+                Ед. изм.
+            </th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td class="align-middle">
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td class="align-middle">
+                    @item.Quantity
+                </td>
+                <td class="align-middle">
+                    @Html.DisplayFor(modelItem => item.Unit)
+                </td>
+                <td class="align-middle">
+                        <a class="btn bg-primary link-light" asp-action="Upsert" asp-route-orderId="@ViewBag.OrderId" asp-route-itemId="@item.Id">
+                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                    </a>
+                    <a class="btn btn-danger link-light " asp-action="Delete" asp-route-orderId="@ViewBag.OrderId" asp-route-itemId="@item.Id">
+                        <i class="fa fa-times" aria-hidden="true"></i>
+                    </a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+<div>
+    <a asp-controller="Home" asp-action="Index">Список заказов</a>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            loadSelect("/Items/GetUnitList", "select_unit");
+        });
+
+        async function loadSelect(provider, selectProvider) {
+            let response = await window.fetch(provider);
+            let json = await response.json();
+            let data = await json.data;
+            let select = document.getElementById(selectProvider);
+            for (let i = 0; i < data.length; i++) {
+                const opt = document.createElement("option");
+                opt.value = data[i];
+                opt.text = data[i];
+                select.append(opt);
+            }
+            const opt = document.createElement("option");
+            opt.value = "";
+            opt.text = "Все";
+            select.append(opt);
+            select.value = "";
+        }
+    </script>
+}

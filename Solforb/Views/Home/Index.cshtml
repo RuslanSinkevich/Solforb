@@ -1,0 +1,116 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Solforb.Models.ViewModel.HomeVM
+
+
+<h3>Список заказов</h3>
+
+
+<div class="d-flex justify-content-between">
+    <a asp-controller="Order" asp-action="Upsert" type="button" class="btn btn-primary">Добавить заказ</a>
+    <a class="btn btn-secondary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+        Фильтр
+    </a>
+</div>
+
+<div class="text-center border shadow p-3 mb-4 mt-3 rounded collapse" id="collapseExample">
+    <form class="d-flex flex-row align-items-end" method="post" asp-action="Index">
+        <div class="mr-3" style="width: 200px">
+            <label class="col-form-label">Номер заказа</label>
+            <input class="form-control" name="Number" type="text" />
+        </div>
+        <div class="mr-3">
+            <label class="col-form-label">Дата начала</label>
+            <input class="form-control" id="dataStart" name="DateStart" value="0" asp-format="{0:yyyy-MM-dd}" type="date"/>
+        </div>
+        <div class="mr-3">
+            <label class="col-form-label">Дата конец</label>
+            <input class="form-control" id="dataEnd" name="DateEnd" value="0" asp-format="{0:yyyy-MM-dd}" type="date"/>
+        </div>
+        <div class="mr-3" style="width: 200px">
+            <label class="form-label">Поставщик</label>
+            <select id="select_provider" name="provider" class="form-control"></select>
+        </div>
+        <div class="mr-3">
+            <input type="submit" value="Поиск" class="btn btn-primary"/>
+        </div>
+        <div class="mr-3">
+            <a asp-controller="Home" asp-action="Index" type="button" class="btn btn-secondary">Сбросить</a>        </div>
+    </form>
+</div>
+<div class="text-center border shadow p-3 mb-4 mt-3 rounded">
+
+    <table class="table table-hover">
+        <thead class="table-dark">
+        <tr>
+            <th scope="col">Номер</th>
+            <th scope="col">Дата</th>
+            <th scope="col">Поставщик</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.Order!) {
+            <tr>
+                <td class="align-middle">
+                    <a class="text-decoration-none" asp-controller="Items" asp-action="Index" asp-route-id="@item.Id">
+                        @Html.DisplayFor(modelItem => item.Number)
+                    </a> 
+                </td>
+                <td class="align-middle">
+                    @Html.DisplayFor(modelItem => item.Date)
+                </td>
+                <td class="align-middle">
+                    @Html.DisplayFor(modelItem => item.Provider!.Name)
+                </td>
+                <td>
+                        <a class="btn bg-primary link-light" asp-controller="Order" asp-action="Upsert" asp-route-id="@item.Id">
+                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                    </a>
+                        <a class="btn btn-danger link-light " asp-controller="Order" asp-action="Delete" asp-route-id="@item.Id">
+                        <i class="fa fa-times"  aria-hidden="true"></i>
+                    </a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            loadSelect("/Provider/GetProviderList", "select_provider");
+            LoadData();
+        });
+
+        async function loadSelect(provider, selectProvider) {
+            let response = await window.fetch(provider);
+            let json = await response.json();
+            let data = await json.data;
+            let select = document.getElementById(selectProvider);
+            for (let i = 0; i < data.length; i++) {
+                const opt = document.createElement("option");
+                opt.value = data[i].id;
+                opt.text = data[i].name;
+                select.append(opt);
+            }
+            const opt = document.createElement("option");
+            opt.value = 0;
+            opt.text = "Все";
+            select.append(opt);
+            select.value = 0;
+        }
+
+        function LoadData() {
+            var date = new Date();
+            var curr_month = date.getMonth() - 1;
+            var data_Start = date.getFullYear() + '-' + ('0' + (curr_month + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+            var data_End = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+            let dataEnd = document.getElementById('dataEnd');
+            let dataStart = document.getElementById('dataStart');
+            dataStart.value = data_Start;
+            dataEnd.value = data_End;
+        };
+    </script>
+
+}

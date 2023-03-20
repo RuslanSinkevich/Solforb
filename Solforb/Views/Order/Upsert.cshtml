@@ -1,0 +1,86 @@
+﻿@model Solforb.Models.Order
+
+@if (Model == null)
+{
+    <h4>Создать новый заказ</h4>
+}
+else
+{
+    <h4>Изменить заказ (@Model?.Number)</h4>
+}
+<hr />
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>@ViewBag.Error</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+<div class="row">
+    <div class="col-md-4">
+        <form class="row" method="post" asp-action="Upsert">
+            @if (Model != null)
+            {
+                <input hidden asp-for="Id" value="@Model?.Id" class="form-control"/>
+            }
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="Number" class="col-form-label">Номер заказа</label>
+                <input asp-for="Number" value="@Model?.Number" class="form-control"/>
+                <span asp-validation-for="Number" class="text-danger"></span>
+            </div>
+            <div class="mb-3 ">
+                <label asp-for="Date" for="Date" class="col-form-label">Дата заказа</label>
+                <input class="form-control" asp-for="Date" asp-format="{0:yyyy-MM-dd}" type="date" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="ProviderId" class="form-label">Поставщик</label>
+                <select asp-for="ProviderId" id="select_provider" value="@Model?.ProviderId" class="form-control" asp-items="ViewBag.ProviderId"></select>
+            </div>
+            <div class="mb-3">
+                @if (Model == null)
+                {
+                    <input type="submit" value="Создать" class="btn btn-primary" />
+                }
+                else
+                {
+                    <input type="submit" value="Обновить" class="btn btn-primary" />
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-controller="Home" asp-action="Index">Назад</a>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            loadProviderSelect(@Model?.ProviderId);
+        });
+
+        async function loadProviderSelect(sel) {
+            let response = await fetch("/Provider/GetProviderList");
+            let json = await response.json();
+            let data = await json.data;
+            let select = document.getElementById('select_provider');
+            for (let i = 0; i < data.length; i++) {
+                const opt = document.createElement("option");
+                opt.value = data[i].id;
+                opt.text = data[i].name;
+                select.append(opt);
+            }
+            if(sel != null)
+            {
+                select.value= sel;
+            }
+        }
+
+
+    </script>
+
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
